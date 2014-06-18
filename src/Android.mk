@@ -21,9 +21,18 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_STATIC_JAVA_LIBRARIES := org.cyanogenmod.launcher.home
 
+LOCAL_PREBUILD_JAVA_LIBRARIES := cardslib
+
 LOCAL_PACKAGE_NAME := CMHome
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
 include $(BUILD_PACKAGE)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
+
+include $(CLEAR_VARS)
+
+LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := \
+	cardslib:libs/cardslib-1.7.1.jar
+
+include $(BUILD_MULTI_PREBUILT)
