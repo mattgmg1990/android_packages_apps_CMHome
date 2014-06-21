@@ -21,6 +21,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.view.CardView;
+
 public class HomeLauncher extends Activity {
 
     private HomeStub mStub;
@@ -29,11 +32,27 @@ public class HomeLauncher extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         mStub = new HomeStub();
         mStub.onStart(this);
         setContentView(mStub.createCustomView(this));
         mStub.onShow(this);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mStub.onDestroy(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mStub.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mStub.onPause(this);
+    }
 }

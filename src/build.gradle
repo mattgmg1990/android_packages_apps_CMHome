@@ -1,9 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url "http://repo1.maven.org/maven2/"
-        }
+        maven { url 'http://repo1.maven.org/maven2/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.11.+'
@@ -13,20 +11,18 @@ apply plugin: 'android'
 
 repositories {
     mavenCentral()
-    maven {
-        url "http://repo1.maven.org/maven2/"
-    }
+    maven { url 'http://repo1.maven.org/maven2/' }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile 'com.github.gabrielemariotti.cards:library:1.7.1'
+    compile 'com.android.support:support-v13:18.0.+'
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.3"
-
+    buildToolsVersion '19.1.0'
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -49,5 +45,16 @@ android {
         // by a similar customization.
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
+    }
+    defaultConfig {}
+    productFlavors {
+    }
+    buildTypes {
+        buildType {
+            debuggable true
+            jniDebugBuild false
+            renderscriptDebugBuild false
+            runProguard true
+        }
     }
 }

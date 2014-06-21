@@ -17,17 +17,27 @@
 package org.cyanogenmod.launcher.home;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
 import com.android.launcher.home.Home;
 
+import org.cyanogenmod.launcher.cardprovider.DashClockExtensionCardProvider;
+import org.cyanogenmod.launcher.cardprovider.ICardProvider;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.view.CardListView;
+
 public class HomeStub implements Home {
 
-    private HomeLayout mHomeLayout;
     private static final String TAG = "HomeStub";
+    private HomeLayout mHomeLayout;
+    private List<ICardProvider> mCardProviders = new ArrayList<ICardProvider>();
 
     private final AccelerateInterpolator mAlphaInterpolator;
 
@@ -38,6 +48,8 @@ public class HomeStub implements Home {
 
     @Override
     public void onStart(Context context) {
+        // Add any providers we wish to include
+        mCardProviders.add(new DashClockExtensionCardProvider(context));
     }
 
     @Override
@@ -91,6 +103,7 @@ public class HomeStub implements Home {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         mHomeLayout = (HomeLayout)inflater.inflate(R.layout.home_layout, null);
+        loadCardsFromProviders(context);
         return mHomeLayout;
     }
 
@@ -107,5 +120,24 @@ public class HomeStub implements Home {
     @Override
     public int getOperationFlags() {
         return Home.FLAG_OP_MASK;
+    }
+
+    /*
+     * Gets a list of all cards provided by each provider,
+     * and updates the UI to show them.
+     */
+    private void loadCardsFromProviders(Context context) {
+        List<Card> cards = new ArrayList<Card>();
+        for(ICardProvider provider : mCardProviders) {
+           for(Card card : provider.getCards()) {
+               cards.add(card);
+           }
+        }
+
+        CardListView cardListView = (CardListView) mHomeLayout.findViewById(R.id.cm_home_cards_list);
+
+        if(cardListView != null) {
+            cardListView.setAdapter(new CardArrayAdapter(context, cards));
+        }
     }
 }
