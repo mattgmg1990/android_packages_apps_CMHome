@@ -150,9 +150,14 @@ public class DashClockExtensionCard extends Card {
         };
 
         private static int sCurrentIconColorIndex = 0;
+        private int mIconColorIndex = -1;
 
         public DashClockThumbnail(Context context) {
             super(context);
+            // Assign this card a color, incrementing the static ongoing color index
+            if(mIconColorIndex == -1) {
+                mIconColorIndex = sCurrentIconColorIndex++ % ICON_BACKGROUND_COLORS.length;
+            }
         }
 
         @Override
@@ -161,8 +166,7 @@ public class DashClockExtensionCard extends Card {
 
             // Pick the next background color for the icon.
             // Choose the color in the order they appear in ICON_BACKGROUND_COLORS.
-            String colorString = ICON_BACKGROUND_COLORS[sCurrentIconColorIndex++
-                                                         % ICON_BACKGROUND_COLORS.length];
+            String colorString = ICON_BACKGROUND_COLORS[mIconColorIndex];
             image.setBackgroundColor(Color.parseColor(colorString));
         }
     }
