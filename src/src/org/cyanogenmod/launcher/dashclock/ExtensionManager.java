@@ -34,8 +34,6 @@ import android.util.Log;
 import com.google.android.apps.dashclock.api.DashClockExtension;
 import com.google.android.apps.dashclock.api.ExtensionData;
 
-import org.cyanogenmod.launcher.dashclock.gmail.GmailExtension;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;

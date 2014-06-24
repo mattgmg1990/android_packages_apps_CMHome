@@ -55,6 +55,9 @@ public class HomeStub implements Home {
     @Override
     public void onDestroy(Context context) {
         mHomeLayout = null;
+        for(ICardProvider cardProvider : mCardProviders) {
+            cardProvider.onDestroy(context);
+        }
     }
 
     @Override
@@ -83,6 +86,10 @@ public class HomeStub implements Home {
     public void onHide(Context context) {
         if (mHomeLayout != null) {
             mHomeLayout.setAlpha(0.0f);
+        }
+
+        for(ICardProvider cardProvider : mCardProviders) {
+            cardProvider.onDestroy(context);
         }
     }
 

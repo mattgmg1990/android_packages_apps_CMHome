@@ -30,6 +30,7 @@ import it.gmariotti.cardslib.library.internal.CardThumbnail;
  * This class provides a card that will represent a DashClock Extension
  */
 public class DashClockExtensionCard extends Card {
+    private final static String TAG = "DashClockExtensionCard";
     private ExtensionManager.ExtensionWithData mExtensionWithData;
 
     public DashClockExtensionCard(Context context, ExtensionManager.ExtensionWithData extensionWithData) {
@@ -46,8 +47,9 @@ public class DashClockExtensionCard extends Card {
         //Add Header
         CardHeader header = new CardHeader(getContext());
         header.setButtonExpandVisible(true);
-        header.setTitle(getTitleFromExtension());
+        header.setTitle(getHeaderTitleFromExtension());
         addCardHeader(header);
+        header.setButtonExpandVisible(false);
 
         addCardIcon();
 
@@ -55,7 +57,9 @@ public class DashClockExtensionCard extends Card {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                // TODO follow click intent on extension
+                if(mExtensionWithData.latestData.clickIntent() != null) {
+                    mContext.startActivity(mExtensionWithData.latestData.clickIntent());
+                }
             }
         });
 
@@ -77,7 +81,7 @@ public class DashClockExtensionCard extends Card {
         }
     }
 
-    private String getTitleFromExtension() {
+    private String getHeaderTitleFromExtension() {
         ExtensionData data = mExtensionWithData.latestData;
         String title = "";
 
@@ -93,8 +97,24 @@ public class DashClockExtensionCard extends Card {
 
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
-        TextView textView = (TextView) view.findViewById(R.id.dashclock_card_inner_status_text);
-        textView.setText(mExtensionWithData.latestData.status());
+        TextView titleTextView = (TextView) view.findViewById(R.id.dashclock_card_inner_title_text);
+        TextView statusTextView = (TextView) view.findViewById(R.id.dashclock_card_inner_status_text);
+        TextView bodyTextView = (TextView) view.findViewById(R.id.dashclock_card_inner_body_text);
+
+        String title = mExtensionWithData.latestData.expandedTitle();
+        String status = mExtensionWithData.latestData.status();
+        String body = mExtensionWithData.latestData.expandedBody();
+
+        if(TextUtils.isEmpty(title) && !TextUtils.isEmpty(status)) {
+            titleTextView.setText(status);
+            statusTextView.setVisibility(View.GONE);
+        } else {
+            titleTextView.setText(title);
+            statusTextView.setText(status);
+            statusTextView.setVisibility(View.VISIBLE);
+        }
+
+        bodyTextView.setText(body);
     }
 
    private class DashClockIconCardThumbnailSource implements CardThumbnail.CustomSource {
