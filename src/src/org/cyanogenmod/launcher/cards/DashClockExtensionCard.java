@@ -2,16 +2,24 @@ package org.cyanogenmod.launcher.cards;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,8 +66,23 @@ public class DashClockExtensionCard extends Card {
             @Override
             public void onClick(Card card, View view) {
                 if(mExtensionWithData.latestData.clickIntent() != null) {
-                    mContext.startActivity(mExtensionWithData.latestData.clickIntent());
+                    Intent clickIntent = mExtensionWithData.latestData.clickIntent();
+                    clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(clickIntent);
                 }
+            }
+        });
+
+        setOnLongClickListener(new OnLongCardClickListener() {
+            @Override
+            public boolean onLongClick(Card card, View view) {
+                if(mExtensionWithData.listing.settingsActivity != null) {
+                    Intent settingsIntent = new Intent();
+                    settingsIntent.setComponent(mExtensionWithData.listing.settingsActivity);
+                    settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(settingsIntent);
+                }
+                return false;
             }
         });
 
@@ -75,7 +98,7 @@ public class DashClockExtensionCard extends Card {
     private void addCardIcon() {
         ExtensionData data = mExtensionWithData.latestData;
         if(data.iconUri() != null || data.icon() > 0) {
-            CardThumbnail thumbnail = new CardThumbnail(mContext);
+            CardThumbnail thumbnail = new DashClockThumbnail(mContext);
             thumbnail.setCustomSource(new DashClockIconCardThumbnailSource(mContext, mExtensionWithData.listing.componentName, data));
             addCardThumbnail(thumbnail);
         }
@@ -117,7 +140,41 @@ public class DashClockExtensionCard extends Card {
         bodyTextView.setText(body);
     }
 
-   private class DashClockIconCardThumbnailSource implements CardThumbnail.CustomSource {
+    private static class DashClockThumbnail extends CardThumbnail {
+        private final static String[] ICON_BACKGROUND_COLORS = {
+                                "#F9A43E", // orange
+                                "#AD62A7", // purple
+                                "#E4C62E", // yellow
+                                "#F16364", // pink-ish
+                                "#2093CD"  // blue
+        };
+
+        private static int sCurrentIconColorIndex = 0;
+
+        public DashClockThumbnail(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void setupInnerViewElements(ViewGroup parent, View viewImage) {
+            ImageView image= (ImageView) viewImage;
+
+            // Pick the next background color for the icon.
+            // Choose the color in the order they appear in ICON_BACKGROUND_COLORS.
+            String colorString = ICON_BACKGROUND_COLORS[sCurrentIconColorIndex++
+                                                         % ICON_BACKGROUND_COLORS.length];
+            image.setBackgroundColor(Color.parseColor(colorString));
+        }
+    }
+
+    private static class DashClockIconCardThumbnailSource implements CardThumbnail.CustomSource {
+        private final static float[] WHITE_COLOR_MATRIX = new float[] {
+                                1f, 1f, 1f, 0, 0,
+                                1f, 1f, 1f, 0, 0,
+                                1f, 1f, 1f, 0, 0,
+                                0, 0, 0, 1f, 0
+        };
+
         Context mContext;
         ComponentName mComponentName;
         ExtensionData mExtensionData;
@@ -137,12 +194,15 @@ public class DashClockExtensionCard extends Card {
         @Override
         public Bitmap getBitmap() {
             Log.d(TAG, "getBitmap called!");
-           // As per the DashClock documentation, prefer the iconUri resource.
-           if(mExtensionData.iconUri() != null) {
-               return getBitmapFromUri(mExtensionData.iconUri());
-           } else {
-               return getIconFromResId(mExtensionData.icon());
-           }
+            Bitmap bitmapToReturn = null;
+            // As per the DashClock documentation, prefer the iconUri resource.
+            if(mExtensionData.iconUri() != null) {
+                bitmapToReturn = getBitmapFromUri(mExtensionData.iconUri());
+            } else {
+                bitmapToReturn = getIconFromResId(mExtensionData.icon());
+            }
+            // Return an all white (leaving alpha alone) version of the icon.
+            return applyWhiteColorFilter(bitmapToReturn);
         }
 
         private Bitmap getIconFromResId(int resId) {
@@ -168,6 +228,24 @@ public class DashClockExtensionCard extends Card {
                 Log.w(TAG, "DashClock icon could not be loaded: " + uri);
             }
             return icon;
+        }
+
+        /**
+         * The DashClock extension docs say that icons should be all white
+         * with a transparent background, but I have found that many do not
+         * respect this. This method corrects that by changing any non-transparent pixel to
+         * white, leaving alpha values alone.
+         * @param bitmap The input bitmap to color.
+         * @return A copy of the original bitmap, colored to white.
+         */
+        private Bitmap applyWhiteColorFilter(Bitmap bitmap) {
+            Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+            Paint paint = new Paint();
+            ColorMatrixColorFilter matrixColorFilter = new ColorMatrixColorFilter(WHITE_COLOR_MATRIX);
+            paint.setColorFilter(matrixColorFilter);
+            Canvas canvas = new Canvas(mutableBitmap);
+            canvas.drawBitmap(mutableBitmap, 0, 0, paint);
+            return mutableBitmap;
         }
     }
 }
