@@ -102,8 +102,10 @@ public interface Home {
      * This method should be used by implementors classes of this protocol to load the needed
      * resources.
      * @param context the current {@link Context} of the host launcher.
+     * @param showContent True if content should be shown, false if the view will be used
+     * only for the transition effect (as in GEL integration)
      */
-    void onStart(Context context);
+     void onStart(Context context, boolean showContent);
 
     /**
      * Invoked when the <code>Home</code> app should be destroy.<br/>
