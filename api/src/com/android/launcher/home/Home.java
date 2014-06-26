@@ -65,7 +65,7 @@ public interface Home {
      * </pre><br/>
      * DO NOT MODIFY!
      */
-    public static final String SIGNATURE = "QqEMOmDF3Fn98HkrIb0V/S4pLkk=";
+    public static final String SIGNATURE = "BYo+7Lfo2nRbtOUo8sA55Ot/FUc=";
 
     /**
      * Defines the name of the metadata used to declared the full qualified Home stub class
@@ -102,10 +102,16 @@ public interface Home {
      * This method should be used by implementors classes of this protocol to load the needed
      * resources.
      * @param context the current {@link Context} of the host launcher.
-     * @param showContent True if content should be shown, false if the view will be used
-     * only for the transition effect (as in GEL integration)
      */
-     void onStart(Context context, boolean showContent);
+     void onStart(Context context);
+
+    /**
+     * Load and show the content of this home app if true,
+     * hide and remove providers if false.
+     * @param showContent Should content be shown
+     *
+     */
+     void setShowContent(Context context, boolean showContent);
 
     /**
      * Invoked when the <code>Home</code> app should be destroy.<br/>
