@@ -35,6 +35,7 @@ public class HomeLauncher extends Activity {
         mStub = new HomeStub();
         mStub.onStart(this);
         setContentView(mStub.createCustomView(this));
+        mStub.setShowContent(this, true);
         mStub.onShow(this);
     }
 

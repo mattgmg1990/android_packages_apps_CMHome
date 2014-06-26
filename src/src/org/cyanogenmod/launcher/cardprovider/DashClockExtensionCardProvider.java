@@ -59,6 +59,11 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
     }
 
     @Override
+    public void requestRefresh() {
+        // nothing
+    }
+
+    @Override
     public void onExtensionsChanged(ComponentName sourceExtension) {
         mExtensionManager.cleanupExtensions();
     }

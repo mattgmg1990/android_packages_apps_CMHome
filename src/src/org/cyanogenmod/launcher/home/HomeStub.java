@@ -17,6 +17,7 @@
 package org.cyanogenmod.launcher.home;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -37,6 +38,7 @@ public class HomeStub implements Home {
 
     private static final String TAG = "HomeStub";
     private HomeLayout mHomeLayout;
+    private boolean mShowContent = false;
     private List<ICardProvider> mCardProviders = new ArrayList<ICardProvider>();
 
     private final AccelerateInterpolator mAlphaInterpolator;
@@ -48,8 +50,30 @@ public class HomeStub implements Home {
 
     @Override
     public void onStart(Context context) {
-        // Add any providers we wish to include
-        mCardProviders.add(new DashClockExtensionCardProvider(context));
+        if(mShowContent) {
+            // Add any providers we wish to include, if we should show content
+            mCardProviders.add(new DashClockExtensionCardProvider(context));
+        }
+    }
+
+    @Override
+    public void setShowContent(Context context, boolean showContent) {
+        mShowContent = showContent;
+        if(mShowContent) {
+            // Add any providers we wish to include, if we should show content
+            mCardProviders.add(new DashClockExtensionCardProvider(context));
+            if(mHomeLayout != null) {
+                loadCardsFromProviders(context);
+            }
+        } else {
+            for(ICardProvider cardProvider : mCardProviders) {
+                cardProvider.onDestroy(context);
+            }
+            mCardProviders.clear();
+            if(mHomeLayout != null) {
+                removeAllCards(context);
+            }
+        }
     }
 
     @Override
@@ -72,6 +96,10 @@ public class HomeStub implements Home {
     public void onShow(Context context) {
         if (mHomeLayout != null) {
             mHomeLayout.setAlpha(1.0f);
+        }
+
+        if(mShowContent) {
+            loadCardsFromProviders(context);
         }
     }
 
@@ -110,7 +138,11 @@ public class HomeStub implements Home {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         mHomeLayout = (HomeLayout)inflater.inflate(R.layout.home_layout, null);
-        loadCardsFromProviders(context);
+
+        if(mShowContent) {
+            loadCardsFromProviders(context);
+        }
+
         return mHomeLayout;
     }
 
@@ -146,5 +178,12 @@ public class HomeStub implements Home {
         if(cardListView != null) {
             cardListView.setAdapter(new CardArrayAdapter(context, cards));
         }
+    }
+
+    private void removeAllCards(Context context) {
+        CardListView cardListView = (CardListView) mHomeLayout.findViewById(R.id.cm_home_cards_list);
+        // Set CardArrayAdapter to an adapter with an empty list
+        List<Card> cards = new ArrayList<Card>();
+        cardListView.setAdapter(new CardArrayAdapter(context, cards));
     }
 }

@@ -16,4 +16,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 	<string name="app_name" translatable="false">CM Home</string>
+    <string name="dashclock_activity_not_found_toast_message">The intended Activity for this extension was not found. Please contact the developer for more info.</string>
 </resources>

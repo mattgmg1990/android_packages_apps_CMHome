@@ -12,5 +12,6 @@ import it.gmariotti.cardslib.library.internal.Card;
 public interface ICardProvider {
     public void onStart(Context context);
     public void onDestroy(Context context);
+    public void requestRefresh();
     public List<Card> getCards();
 }
