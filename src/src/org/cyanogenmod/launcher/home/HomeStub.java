@@ -188,6 +188,7 @@ public class HomeStub implements Home {
 
     public void refreshCards() {
         List<Card> originalCards = mCardArrayAdapter.getCards();
+
         // Allow each provider to update it's cards
         for(ICardProvider cardProvider : mCardProviders) {
             cardProvider.updateAndAddCards(originalCards);

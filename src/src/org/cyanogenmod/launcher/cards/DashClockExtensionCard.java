@@ -121,9 +121,6 @@ public class DashClockExtensionCard extends Card {
         Log.d(TAG, "UPDATE: " + mExtensionWithData.listing.componentName.flattenToString() + " ---> " + extensionWithData.listing.componentName.flattenToString());
         mExtensionWithData = extensionWithData;
         init();
-        if(mInnerView != null) {
-            setupInnerView(mInnerView);
-        }
     }
 
     private void addCardIcon() {
