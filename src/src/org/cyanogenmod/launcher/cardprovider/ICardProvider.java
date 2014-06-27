@@ -13,5 +13,13 @@ public interface ICardProvider {
     public void onStart(Context context);
     public void onDestroy(Context context);
     public void requestRefresh();
+
+    /**
+     * Given a list of cards, update any card for which
+     * there is new data available. Add or remove cards
+     * as required.
+     * @param cards Cards to update
+     */
+    public void updateAndAddCards(List<Card> cards);
     public List<Card> getCards();
 }

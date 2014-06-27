@@ -9,7 +9,9 @@ import org.cyanogenmod.launcher.dashclock.ExtensionHost;
 import org.cyanogenmod.launcher.dashclock.ExtensionManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -61,6 +63,50 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
     @Override
     public void requestRefresh() {
         // nothing
+    }
+
+    @Override
+    public void updateAndAddCards(List<Card> cards) {
+        List<ExtensionManager.ExtensionWithData> extensions
+                = mExtensionManager.getActiveExtensionsWithData();
+
+        // Create a map from ComponentName String -> extensionWithData
+        HashMap<String, ExtensionManager.ExtensionWithData> map
+                = new HashMap<String, ExtensionManager.ExtensionWithData>();
+        for(ExtensionManager.ExtensionWithData extension : extensions) {
+            map.put(extension.listing.componentName.flattenToString(), extension);
+        }
+
+        List<Card> cardsToRemove = new ArrayList<Card>();
+
+        for(Card card : cards) {
+            if(card instanceof DashClockExtensionCard) {
+                DashClockExtensionCard dashClockExtensionCard
+                        = (DashClockExtensionCard) card;
+                if(map.containsKey(dashClockExtensionCard
+                        .getFlattenedComponentNameString())) {
+                    dashClockExtensionCard
+                            .updateFromExtensionWithData(map.get(dashClockExtensionCard
+                            .getFlattenedComponentNameString()));
+                    map.remove(dashClockExtensionCard.getFlattenedComponentNameString());
+                } else {
+                    cardsToRemove.add(card);
+                }
+            }
+        }
+
+        // Remove cards for which extensions are no longer available
+        cards.removeAll(cardsToRemove);
+
+        // Create new cards for extensions that were not represented
+        for(Map.Entry<String, ExtensionManager.ExtensionWithData> entry : map.entrySet()) {
+            ExtensionManager.ExtensionWithData extension = entry.getValue();
+
+            if(extension.latestData != null && !TextUtils.isEmpty(extension.latestData.status())) {
+                Card card = new DashClockExtensionCard(mContext, extension);
+                cards.add(card);
+            }
+        }
     }
 
     @Override

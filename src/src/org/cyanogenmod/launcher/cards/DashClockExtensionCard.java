@@ -40,6 +40,7 @@ import it.gmariotti.cardslib.library.internal.CardThumbnail;
 public class DashClockExtensionCard extends Card {
     private final static String TAG = "DashClockExtensionCard";
     private ExtensionManager.ExtensionWithData mExtensionWithData;
+    private String mFlattenedComponentNameString = "";
 
     public DashClockExtensionCard(Context context, ExtensionManager.ExtensionWithData extensionWithData) {
         this(context, extensionWithData, R.layout.dashclock_card_inner_content);
@@ -52,6 +53,10 @@ public class DashClockExtensionCard extends Card {
     }
 
     private void init() {
+        // Track the ComponentName of the extension driving this card
+        mFlattenedComponentNameString
+                = mExtensionWithData.listing.componentName.flattenToString();
+
         //Add Header
         CardHeader header = new CardHeader(getContext());
         header.setButtonExpandVisible(true);
@@ -112,13 +117,28 @@ public class DashClockExtensionCard extends Card {
         });
     }
 
+    public void updateFromExtensionWithData(ExtensionManager.ExtensionWithData extensionWithData) {
+        Log.d(TAG, "UPDATE: " + mExtensionWithData.listing.componentName.flattenToString() + " ---> " + extensionWithData.listing.componentName.flattenToString());
+        mExtensionWithData = extensionWithData;
+        init();
+        if(mInnerView != null) {
+            setupInnerView(mInnerView);
+        }
+    }
+
     private void addCardIcon() {
         ExtensionData data = mExtensionWithData.latestData;
-        if(data.iconUri() != null || data.icon() > 0) {
+        if(getCardThumbnail() == null
+           && (data.iconUri() != null
+                || data.icon() > 0)) {
             CardThumbnail thumbnail = new DashClockThumbnail(mContext);
             thumbnail.setCustomSource(new DashClockIconCardThumbnailSource(mContext, mExtensionWithData.listing.componentName, data));
             addCardThumbnail(thumbnail);
         }
+    }
+
+    public String getFlattenedComponentNameString() {
+        return mFlattenedComponentNameString;
     }
 
     private String getHeaderTitleFromExtension() {
@@ -137,6 +157,10 @@ public class DashClockExtensionCard extends Card {
 
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
+        setupInnerView(view);
+    }
+
+    public void setupInnerView(View view) {
         TextView titleTextView = (TextView) view.findViewById(R.id.dashclock_card_inner_title_text);
         TextView statusTextView = (TextView) view.findViewById(R.id.dashclock_card_inner_status_text);
         TextView bodyTextView = (TextView) view.findViewById(R.id.dashclock_card_inner_body_text);

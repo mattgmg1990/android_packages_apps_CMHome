@@ -40,6 +40,7 @@ public class HomeStub implements Home {
     private HomeLayout mHomeLayout;
     private boolean mShowContent = false;
     private List<ICardProvider> mCardProviders = new ArrayList<ICardProvider>();
+    private CMHomeCardArrayAdapter mCardArrayAdapter;
 
     private final AccelerateInterpolator mAlphaInterpolator;
 
@@ -96,10 +97,10 @@ public class HomeStub implements Home {
     public void onShow(Context context) {
         if (mHomeLayout != null) {
             mHomeLayout.setAlpha(1.0f);
-        }
 
-        if(mShowContent) {
-            loadCardsFromProviders(context);
+            if(mShowContent) {
+                loadCardsFromProviders(context);
+            }
         }
     }
 
@@ -139,10 +140,6 @@ public class HomeStub implements Home {
                 Context.LAYOUT_INFLATER_SERVICE);
         mHomeLayout = (HomeLayout)inflater.inflate(R.layout.home_layout, null);
 
-        if(mShowContent) {
-            loadCardsFromProviders(context);
-        }
-
         return mHomeLayout;
     }
 
@@ -166,6 +163,14 @@ public class HomeStub implements Home {
      * and updates the UI to show them.
      */
     private void loadCardsFromProviders(Context context) {
+        // If cards have been initialized already, just update them
+        if(mCardArrayAdapter != null
+           && mCardArrayAdapter.getCards().size() > 0
+           && mHomeLayout != null) {
+            refreshCards();
+            return;
+        }
+
         List<Card> cards = new ArrayList<Card>();
         for(ICardProvider provider : mCardProviders) {
            for(Card card : provider.getCards()) {
@@ -176,14 +181,41 @@ public class HomeStub implements Home {
         CardListView cardListView = (CardListView) mHomeLayout.findViewById(R.id.cm_home_cards_list);
 
         if(cardListView != null) {
-            cardListView.setAdapter(new CardArrayAdapter(context, cards));
+            mCardArrayAdapter = new CMHomeCardArrayAdapter(context, cards);
+            cardListView.setAdapter(mCardArrayAdapter);
         }
+    }
+
+    public void refreshCards() {
+        List<Card> originalCards = mCardArrayAdapter.getCards();
+        // Allow each provider to update it's cards
+        for(ICardProvider cardProvider : mCardProviders) {
+            cardProvider.updateAndAddCards(originalCards);
+        }
+
+        mCardArrayAdapter.notifyDataSetChanged();
     }
 
     private void removeAllCards(Context context) {
         CardListView cardListView = (CardListView) mHomeLayout.findViewById(R.id.cm_home_cards_list);
         // Set CardArrayAdapter to an adapter with an empty list
         List<Card> cards = new ArrayList<Card>();
-        cardListView.setAdapter(new CardArrayAdapter(context, cards));
+        mCardArrayAdapter = new CMHomeCardArrayAdapter(context, cards);
+        cardListView.setAdapter(mCardArrayAdapter);
+    }
+
+    public class CMHomeCardArrayAdapter extends CardArrayAdapter {
+
+        public CMHomeCardArrayAdapter(Context context, List<Card> cards) {
+            super(context, cards);
+        }
+
+        public List<Card> getCards() {
+            List<Card> cardsToReturn = new ArrayList<Card>();
+            for(int i = 0; i < getCount(); i++) {
+                cardsToReturn.add(getItem(i));
+            }
+            return cardsToReturn;
+        }
     }
 }
