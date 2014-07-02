@@ -66,7 +66,7 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
     }
 
     @Override
-    public void updateAndAddCards(List<Card> cards) {
+    public List<Card> updateAndAddCards(List<Card> cards) {
         List<ExtensionManager.ExtensionWithData> extensions
                 = mExtensionManager.getActiveExtensionsWithData();
 
@@ -76,8 +76,6 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
         for(ExtensionManager.ExtensionWithData extension : extensions) {
             map.put(extension.listing.componentName.flattenToString(), extension);
         }
-
-        List<Card> cardsToRemove = new ArrayList<Card>();
 
         for(Card card : cards) {
             if(card instanceof DashClockExtensionCard) {
@@ -89,14 +87,12 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
                             .updateFromExtensionWithData(map.get(dashClockExtensionCard
                             .getFlattenedComponentNameString()));
                     map.remove(dashClockExtensionCard.getFlattenedComponentNameString());
-                } else {
-                    cardsToRemove.add(card);
                 }
             }
         }
 
-        // Remove cards for which extensions are no longer available
-        cards.removeAll(cardsToRemove);
+        // A List of cards to return that must be added
+        List<Card> cardsToAdd = new ArrayList<Card>();
 
         // Create new cards for extensions that were not represented
         for(Map.Entry<String, ExtensionManager.ExtensionWithData> entry : map.entrySet()) {
@@ -104,9 +100,11 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
 
             if(extension.latestData != null && !TextUtils.isEmpty(extension.latestData.status())) {
                 Card card = new DashClockExtensionCard(mContext, extension);
-                cards.add(card);
+                cardsToAdd.add(card);
             }
         }
+
+        return cardsToAdd;
     }
 
     @Override

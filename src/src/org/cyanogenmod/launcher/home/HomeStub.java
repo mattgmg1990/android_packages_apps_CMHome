@@ -53,7 +53,9 @@ public class HomeStub implements Home {
     public void onStart(Context context) {
         if(mShowContent) {
             // Add any providers we wish to include, if we should show content
-            mCardProviders.add(new DashClockExtensionCardProvider(context));
+            if(mCardProviders.size() == 0) {
+                mCardProviders.add(new DashClockExtensionCardProvider(context));
+            }
         }
     }
 
@@ -62,7 +64,9 @@ public class HomeStub implements Home {
         mShowContent = showContent;
         if(mShowContent) {
             // Add any providers we wish to include, if we should show content
-            mCardProviders.add(new DashClockExtensionCardProvider(context));
+            if(mCardProviders.size() == 0) {
+                mCardProviders.add(new DashClockExtensionCardProvider(context));
+            }
             if(mHomeLayout != null) {
                 loadCardsFromProviders(context);
             }
@@ -191,7 +195,8 @@ public class HomeStub implements Home {
 
         // Allow each provider to update it's cards
         for(ICardProvider cardProvider : mCardProviders) {
-            cardProvider.updateAndAddCards(originalCards);
+            List<Card> cardsToAdd = cardProvider.updateAndAddCards(originalCards);
+            mCardArrayAdapter.addAll(cardsToAdd);
         }
 
         mCardArrayAdapter.notifyDataSetChanged();

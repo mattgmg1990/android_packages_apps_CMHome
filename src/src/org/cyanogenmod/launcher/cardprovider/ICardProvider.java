@@ -16,10 +16,10 @@ public interface ICardProvider {
 
     /**
      * Given a list of cards, update any card for which
-     * there is new data available. Add or remove cards
-     * as required.
+     * there is new data available.
      * @param cards Cards to update
+     * @return A list of cards that must be added
      */
-    public void updateAndAddCards(List<Card> cards);
+    public List<Card> updateAndAddCards(List<Card> cards);
     public List<Card> getCards();
 }
