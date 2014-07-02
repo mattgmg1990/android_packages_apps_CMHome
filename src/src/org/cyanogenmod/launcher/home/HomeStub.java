@@ -44,6 +44,14 @@ public class HomeStub implements Home {
 
     private final AccelerateInterpolator mAlphaInterpolator;
 
+    private final ICardProvider.CardProviderUpdateListener mCardProviderUpdateListener =
+            new ICardProvider.CardProviderUpdateListener() {
+                @Override
+                public void onCardProviderUpdate() {
+                    refreshCards();
+                }
+            };
+
     public HomeStub() {
         super();
         mAlphaInterpolator = new AccelerateInterpolator();
@@ -53,9 +61,7 @@ public class HomeStub implements Home {
     public void onStart(Context context) {
         if(mShowContent) {
             // Add any providers we wish to include, if we should show content
-            if(mCardProviders.size() == 0) {
-                mCardProviders.add(new DashClockExtensionCardProvider(context));
-            }
+            initProvidersIfNeeded(context);
         }
     }
 
@@ -64,9 +70,7 @@ public class HomeStub implements Home {
         mShowContent = showContent;
         if(mShowContent) {
             // Add any providers we wish to include, if we should show content
-            if(mCardProviders.size() == 0) {
-                mCardProviders.add(new DashClockExtensionCardProvider(context));
-            }
+            initProvidersIfNeeded(context);
             if(mHomeLayout != null) {
                 loadCardsFromProviders(context);
             }
@@ -160,6 +164,16 @@ public class HomeStub implements Home {
     @Override
     public int getOperationFlags() {
         return Home.FLAG_OP_MASK;
+    }
+
+    public void initProvidersIfNeeded(Context context) {
+        if (mCardProviders.size() == 0) {
+            mCardProviders.add(new DashClockExtensionCardProvider(context));
+
+            for (ICardProvider cardProvider : mCardProviders) {
+                cardProvider.addOnUpdateListener(mCardProviderUpdateListener);
+            }
+        }
     }
 
     /*

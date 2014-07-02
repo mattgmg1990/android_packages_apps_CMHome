@@ -25,6 +25,7 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
     private ExtensionManager mExtensionManager;
     private ExtensionHost mExtensionHost;
     private Context mContext;
+    private List<CardProviderUpdateListener> mUpdateListeners = new ArrayList<CardProviderUpdateListener>();
 
     public DashClockExtensionCardProvider(Context context) {
         mContext = context;
@@ -109,10 +110,12 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
 
     @Override
     public void onExtensionsChanged(ComponentName sourceExtension) {
-        mExtensionManager.cleanupExtensions();
+        for(CardProviderUpdateListener listener : mUpdateListeners) {
+            listener.onCardProviderUpdate();
+        }
     }
 
-    /*
+    /**
      * Retrieves a list of all available extensions installed on the device
      * and sets mExtensionManager to track them for updates.
      */
@@ -122,5 +125,14 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
            availableComponents.add(listing.componentName);
         }
         mExtensionManager.setActiveExtensions(availableComponents);
+    }
+
+    /**
+     * Adds a listener for any extension updates.
+     * @param listener The listener to update
+     */
+    @Override
+    public void addOnUpdateListener(CardProviderUpdateListener listener) {
+        mUpdateListeners.add(listener);
     }
 }

@@ -22,4 +22,9 @@ public interface ICardProvider {
      */
     public List<Card> updateAndAddCards(List<Card> cards);
     public List<Card> getCards();
+    public void addOnUpdateListener(CardProviderUpdateListener listener);
+
+    public interface CardProviderUpdateListener {
+        public void onCardProviderUpdate();
+    }
 }
