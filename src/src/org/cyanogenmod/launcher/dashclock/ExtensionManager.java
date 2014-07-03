@@ -267,7 +267,7 @@ public class ExtensionManager {
             mValuesPreferences.edit()
                     .putString(componentName.flattenToString(),
                             extensionData.serialize().toString())
-                    .commit();
+                    .apply();
         } catch (JSONException e) {
             Log.e(TAG, "Error storing extension data cache for " + componentName + ".", e);
         }
@@ -276,7 +276,7 @@ public class ExtensionManager {
     private void destroyExtensionData(ComponentName componentName) {
         mValuesPreferences.edit()
                 .remove(componentName.flattenToString())
-                .commit();
+                .apply();
     }
 
     public List<ExtensionWithData> getActiveExtensionsWithData() {

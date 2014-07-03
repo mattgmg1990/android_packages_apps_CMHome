@@ -3,6 +3,7 @@ package org.cyanogenmod.launcher.cardprovider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.cyanogenmod.launcher.cards.DashClockExtensionCard;
 import org.cyanogenmod.launcher.dashclock.ExtensionHost;
@@ -37,14 +38,19 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
     }
 
     @Override
-    public void onStart(Context context) {
-
+    public void onShow() {
+        mExtensionHost.init();
+        mExtensionManager.addOnChangeListener(this);
+        trackAllExtensions();
     }
 
     @Override
-    public void onDestroy(Context context) {
+    public void onHide(Context context) {
+        // Tear down the extension connections when the app is hidden,
+        // so that we don't block other readers (i.e. actual dashclock).
         mExtensionManager.removeOnChangeListener(this);
         mExtensionHost.destroy();
+        mExtensionManager.setActiveExtensions(new ArrayList<ComponentName>());
     }
 
     @Override
@@ -63,7 +69,8 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
 
     @Override
     public void requestRefresh() {
-        // nothing
+        trackAllExtensions();
+        mExtensionHost.requestAllManualUpdate();
     }
 
     @Override

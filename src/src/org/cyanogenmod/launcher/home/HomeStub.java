@@ -48,7 +48,7 @@ public class HomeStub implements Home {
             new ICardProvider.CardProviderUpdateListener() {
                 @Override
                 public void onCardProviderUpdate() {
-                    refreshCards();
+                    refreshCards(true);
                 }
             };
 
@@ -76,7 +76,7 @@ public class HomeStub implements Home {
             }
         } else {
             for(ICardProvider cardProvider : mCardProviders) {
-                cardProvider.onDestroy(context);
+                cardProvider.onHide(context);
             }
             mCardProviders.clear();
             if(mHomeLayout != null) {
@@ -88,9 +88,6 @@ public class HomeStub implements Home {
     @Override
     public void onDestroy(Context context) {
         mHomeLayout = null;
-        for(ICardProvider cardProvider : mCardProviders) {
-            cardProvider.onDestroy(context);
-        }
     }
 
     @Override
@@ -107,7 +104,12 @@ public class HomeStub implements Home {
             mHomeLayout.setAlpha(1.0f);
 
             if(mShowContent) {
-                loadCardsFromProviders(context);
+                for(ICardProvider cardProvider : mCardProviders) {
+                    cardProvider.onShow();
+                }
+                for(ICardProvider cardProvider : mCardProviders) {
+                    cardProvider.requestRefresh();
+                }
             }
         }
     }
@@ -124,9 +126,8 @@ public class HomeStub implements Home {
         if (mHomeLayout != null) {
             mHomeLayout.setAlpha(0.0f);
         }
-
         for(ICardProvider cardProvider : mCardProviders) {
-            cardProvider.onDestroy(context);
+            cardProvider.onHide(context);
         }
     }
 
@@ -185,7 +186,7 @@ public class HomeStub implements Home {
         if(mCardArrayAdapter != null
            && mCardArrayAdapter.getCards().size() > 0
            && mHomeLayout != null) {
-            refreshCards();
+            refreshCards(true);
             return;
         }
 
@@ -204,13 +205,20 @@ public class HomeStub implements Home {
         }
     }
 
-    public void refreshCards() {
+    /**
+     * Refresh all cards by asking the providers to update them.
+     * @param addNew If providers have new cards that have not
+     * been displayed yet, should they be added?
+     */
+    public void refreshCards(boolean addNew) {
         List<Card> originalCards = mCardArrayAdapter.getCards();
 
         // Allow each provider to update it's cards
         for(ICardProvider cardProvider : mCardProviders) {
             List<Card> cardsToAdd = cardProvider.updateAndAddCards(originalCards);
-            mCardArrayAdapter.addAll(cardsToAdd);
+            if(addNew) {
+                mCardArrayAdapter.addAll(cardsToAdd);
+            }
         }
 
         mCardArrayAdapter.notifyDataSetChanged();

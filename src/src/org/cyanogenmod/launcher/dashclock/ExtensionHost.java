@@ -88,7 +88,11 @@ public class ExtensionHost {
 
     public ExtensionHost(Context context) {
         mContext = context;
-        mExtensionManager = ExtensionManager.getInstance(context);
+        init();
+    }
+
+    public void init() {
+        mExtensionManager = ExtensionManager.getInstance(mContext);
         mExtensionManager.addOnChangeListener(mChangeListener);
 
         HandlerThread thread = new HandlerThread("ExtensionHost");
@@ -301,6 +305,13 @@ public class ExtensionHost {
                 }
             }
         };
+    }
+
+    public void requestAllManualUpdate() {
+        for (ComponentName cn : mExtensionConnections.keySet()) {
+            execute(cn, UPDATE_OPERATIONS.get(DashClockExtension.UPDATE_REASON_MANUAL),
+                    0, null);
+        }
     }
 
     private void destroyConnection(Connection conn) {

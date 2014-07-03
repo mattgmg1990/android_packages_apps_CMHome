@@ -18,6 +18,7 @@ package org.cyanogenmod.launcher.home;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 
@@ -42,6 +43,11 @@ public class HomeLauncher extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         mStub.onDestroy(this);
     }
 
@@ -49,6 +55,7 @@ public class HomeLauncher extends Activity {
     protected void onResume() {
         super.onResume();
         mStub.onResume(this);
+        mStub.onShow(this);
     }
 
     @Override

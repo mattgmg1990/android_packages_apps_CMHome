@@ -118,7 +118,12 @@ public class DashClockExtensionCard extends Card {
     }
 
     public void updateFromExtensionWithData(ExtensionManager.ExtensionWithData extensionWithData) {
-        Log.d(TAG, "UPDATE: " + mExtensionWithData.listing.componentName.flattenToString() + " ---> " + extensionWithData.listing.componentName.flattenToString());
+        if(TextUtils.isEmpty(extensionWithData.latestData.expandedBody())
+            && TextUtils.isEmpty(extensionWithData.latestData.status())
+            && TextUtils.isEmpty(extensionWithData.latestData.expandedTitle())) {
+            // Empty update, don't continue.
+            return;
+        }
         mExtensionWithData = extensionWithData;
         init();
     }
