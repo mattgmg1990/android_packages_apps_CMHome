@@ -18,6 +18,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,8 +32,10 @@ import org.cyanogenmod.launcher.home.R;
 import java.io.FileNotFoundException;
 
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardExpand;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
+import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 
 /**
  * This class provides a card that will represent a DashClock Extension
@@ -61,52 +64,13 @@ public class DashClockExtensionCard extends Card {
         CardHeader header = new CardHeader(getContext());
         header.setButtonExpandVisible(true);
         header.setTitle(getHeaderTitleFromExtension());
-        addCardHeader(header);
         header.setButtonExpandVisible(false);
+        addCardHeader(header);
 
         addCardIcon();
 
-        setOnClickListener(new OnCardClickListener() {
-            @Override
-            public void onClick(Card card, View view) {
-                if(mExtensionWithData.latestData.clickIntent() != null) {
-                    Intent clickIntent = mExtensionWithData.latestData.clickIntent();
-                    clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        mContext.startActivity(clickIntent);
-                    } catch (ActivityNotFoundException e) {
-                        // Currently, this toast does not appear when
-                        // CMHome is used in Trebuchet because the UID does not match
-                        // the package.
-                        Toast.makeText(mContext,
-                                R.string.dashclock_activity_not_found_toast_message,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        });
-
-        setOnLongClickListener(new OnLongCardClickListener() {
-            @Override
-            public boolean onLongClick(Card card, View view) {
-                if(mExtensionWithData.listing.settingsActivity != null) {
-                    Intent settingsIntent = new Intent();
-                    settingsIntent.setComponent(mExtensionWithData.listing.settingsActivity);
-                    settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        mContext.startActivity(settingsIntent);
-                    } catch (ActivityNotFoundException e) {
-                        // Currently, this toast does not appear when
-                        // CMHome is used in Trebuchet because the UID does not match
-                        // the package.
-                        Toast.makeText(mContext,
-                                R.string.dashclock_activity_not_found_toast_message,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-                return false;
-            }
-        });
+        DashClockCardExpand cardExpand = new DashClockCardExpand(getContext());
+        addCardExpand(cardExpand);
 
         //Add swipe Listener
         setOnSwipeListener(new OnSwipeListener() {
@@ -181,6 +145,10 @@ public class DashClockExtensionCard extends Card {
         }
 
         bodyTextView.setText(body);
+
+        // Clicking the card expands it
+        ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().setupView(getCardView());
+        setViewToClickToExpand(viewToClickToExpand);
     }
 
     private static class DashClockThumbnail extends CardThumbnail {
@@ -293,6 +261,69 @@ public class DashClockExtensionCard extends Card {
             Canvas canvas = new Canvas(mutableBitmap);
             canvas.drawBitmap(mutableBitmap, 0, 0, paint);
             return mutableBitmap;
+        }
+    }
+
+    private class DashClockCardExpand extends CardExpand {
+
+        public DashClockCardExpand(Context context) {
+            super(context, R.layout.dashclock_card_expand_inner_content);
+        }
+
+        @Override
+        public void setupInnerViewElements(ViewGroup parent, View view) {
+
+            if (view == null) return;
+
+            Button clickButton =
+                    (Button) view.findViewById(R.id.dashclock_card_expand_action_button);
+            if (clickButton != null) {
+                clickButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(mExtensionWithData.latestData.clickIntent() != null) {
+                            Intent clickIntent = mExtensionWithData.latestData.clickIntent();
+                            clickIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            try {
+                                mContext.startActivity(clickIntent);
+                            } catch (ActivityNotFoundException e) {
+                                // Currently, this toast does not appear when
+                                // CMHome is used in Trebuchet because the UID does not match
+                                // the package.
+                                Toast.makeText(mContext,
+                                        R.string.dashclock_activity_not_found_toast_message,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                });
+            }
+
+            Button settingsButton =
+                    (Button) view.findViewById(R.id.dashclock_card_expand_settings_button);
+
+            if (settingsButton != null) {
+                settingsButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(mExtensionWithData.listing.settingsActivity != null) {
+                            Intent settingsIntent = new Intent();
+                            settingsIntent.setComponent(mExtensionWithData.listing.settingsActivity);
+                            settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            try {
+                                mContext.startActivity(settingsIntent);
+                            } catch (ActivityNotFoundException e) {
+                                // Currently, this toast does not appear when
+                                // CMHome is used in Trebuchet because the UID does not match
+                                // the package.
+                                Toast.makeText(mContext,
+                                        R.string.dashclock_activity_not_found_toast_message,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                });
+            }
         }
     }
 }
