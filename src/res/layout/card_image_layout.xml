@@ -54,7 +54,7 @@
                 android:id="@+id/card_thumbnail_layout"
                 card:card_thumbnail_layout_resourceID="@layout/dashclock_icon_thumbnail_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
 
             <!-- Main Content View -->
             <FrameLayout
