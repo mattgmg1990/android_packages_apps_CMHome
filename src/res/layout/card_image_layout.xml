@@ -60,8 +60,9 @@
             <FrameLayout
                 android:id="@+id/card_main_content_layout"
                 style="@style/card.content_outer_layout"
+                android:layout_marginBottom="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
 
         </LinearLayout>
 

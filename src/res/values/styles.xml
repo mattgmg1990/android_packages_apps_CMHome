@@ -9,6 +9,7 @@
     <style name="dashclock_card_inner_body_text">
         <item name="android:textSize">14sp</item>
         <item name="android:layout_marginLeft">@dimen/card_header_simple_title_margin_left</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="simple_message_card_inner_title_text">
