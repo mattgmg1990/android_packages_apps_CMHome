@@ -41,6 +41,7 @@ public interface ICardProvider {
 
     public interface CardProviderUpdateListener {
         public void onCardProviderUpdate(String cardId);
+        public void onCardDelete(String cardId);
     }
 
     public class CardProviderUpdateResult {

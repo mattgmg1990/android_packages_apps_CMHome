@@ -211,7 +211,7 @@ public class DashClockExtensionCardProvider implements ICardProvider, ExtensionM
 
     /**
      * Retrieves a list of all available extensions installed on the device
-     * and sets mExtensionManager to track them for updates.
+     * and sets mExtensionManager to track them for updates
      */
     private void trackAllExtensions() {
         List<ComponentName> availableComponents = new ArrayList<ComponentName>();

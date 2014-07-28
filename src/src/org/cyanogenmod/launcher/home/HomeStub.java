@@ -24,6 +24,7 @@ import android.view.animation.AccelerateInterpolator;
 
 import com.android.launcher.home.Home;
 
+import org.cyanogenmod.launcher.cardprovider.CmHomeApiCardProvider;
 import org.cyanogenmod.launcher.cardprovider.DashClockExtensionCardProvider;
 import org.cyanogenmod.launcher.cardprovider.ICardProvider;
 import org.cyanogenmod.launcher.cardprovider.ICardProvider.CardProviderUpdateResult;
@@ -60,6 +61,11 @@ public class HomeStub implements Home {
                 public void onCardProviderUpdate(String cardId) {
                     refreshCard(cardId);
                 }
+
+                @Override
+                public void onCardDelete(String cardId) {
+                    removeCard(cardId);
+                }
             };
 
     public HomeStub() {
@@ -79,6 +85,7 @@ public class HomeStub implements Home {
             // Add any providers we wish to include, if we should show content
             initProvidersIfNeeded(context);
         }
+
     }
 
     @Override
@@ -186,6 +193,7 @@ public class HomeStub implements Home {
     public void initProvidersIfNeeded(Context context) {
         if (mCardProviders.size() == 0) {
             mCardProviders.add(new DashClockExtensionCardProvider(context, mHostActivityContext));
+            mCardProviders.add(new CmHomeApiCardProvider(context, mHostActivityContext));
 
             for (ICardProvider cardProvider : mCardProviders) {
                 cardProvider.addOnUpdateListener(mCardProviderUpdateListener);
@@ -244,6 +252,14 @@ public class HomeStub implements Home {
                     new LoadSingleCardTask(cardId, mCMHomeContext);
             mUpdateTasks.put(cardId, newTask);
             newTask.execute();
+        }
+    }
+
+    private void removeCard(String cardId) {
+        if (mCardArrayAdapter != null) {
+            Card card = mCardArrayAdapter.getCardWithId(cardId);
+            mCardArrayAdapter.remove(card);
+            mCardArrayAdapter.notifyDataSetChanged();
         }
     }
 
@@ -324,7 +340,6 @@ public class HomeStub implements Home {
                     cards.add(card);
                 }
             }
-
             // If there aren't any cards, show the user a message about how to fix that!
             if (cards.size() == 0) {
                 cards.add(getNoExtensionsCard(mContext));
@@ -347,46 +362,47 @@ public class HomeStub implements Home {
         }
     }
 
-    private class RefreshAllCardsTask extends AsyncTask<Void, Void, CardProviderUpdateResult> {
+    private class RefreshAllCardsTask extends AsyncTask<Void, Void, Void> {
         private boolean mAddNew = false;
         private int mFinalCardCount = 0;
         private boolean mNoExtensionsCardExists = false;
+        private List<Card> mCardsToAdd = new ArrayList<Card>();
+        private List<Card> mCardsToRemove = new ArrayList<Card>();
 
         public RefreshAllCardsTask(boolean addNew) {
             mAddNew = addNew;
         }
 
         @Override
-        protected CardProviderUpdateResult doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
             List<Card> originalCards = mCardArrayAdapter.getCards();
 
-            CardProviderUpdateResult updateResult = null;
+            CardProviderUpdateResult updateResult;
             // Allow each provider to update it's cards
             for (ICardProvider cardProvider : mCardProviders) {
                 updateResult = cardProvider.updateAndAddCards(originalCards);
+                mCardsToAdd.addAll(updateResult.getCardsToAdd());
+                mCardsToRemove.addAll(updateResult.getCardsToRemove());
             }
 
             mNoExtensionsCardExists = originalCards.contains(mNoExtensionsCard);
             mFinalCardCount = originalCards.size();
 
-            if (updateResult != null) {
-                mFinalCardCount += updateResult.getCardsToAdd().size();
-                mFinalCardCount -= updateResult.getCardsToRemove().size();
-            }
-            return updateResult;
+            mFinalCardCount += mCardsToAdd.size();
+            mFinalCardCount -= mCardsToRemove.size();
+            return null;
         }
 
         @Override
-        protected void onPostExecute(CardProviderUpdateResult updateResult) {
-            super.onPostExecute(updateResult);
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
 
-            if (updateResult != null) {
-                if (mAddNew) {
-                    mCardArrayAdapter.addAll(updateResult.getCardsToAdd());
-                }
-                for (Card card : updateResult.getCardsToRemove()) {
-                    mCardArrayAdapter.remove(card);
-                }
+            if (mAddNew) {
+                mCardArrayAdapter.addAll(mCardsToAdd);
+            }
+
+            for (Card card : mCardsToRemove) {
+                mCardArrayAdapter.remove(card);
             }
 
             if (mNoExtensionsCardExists && mFinalCardCount > 1) {

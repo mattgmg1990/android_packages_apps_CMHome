@@ -18,6 +18,10 @@
     <string name="app_name">CM Home</string>
     <string name="permission_desc_read_extension_data">Allows requesting DashClock extension data</string>
     <string name="permission_label_read_extension_data">Request DashClock extension data</string>
+    <string name="permission_desc_feed_read">Can read all CM Home API data</string>
+    <string name="permission_label_feed_read">Read from CM Home</string>
+    <string name="permission_desc_feed_write">Can add or remove any CM Home API data</string>
+    <string name="permission_label_feed_write">Publish to CM Home</string>
     <string name="dashclock_activity_not_found_toast_message">The intended Activity for this extension was not found. Please contact the developer for more info.</string>
     <string name="dashclock_card_expand_action">Action</string>
     <string name="dashclock_card_expand_settings">Settings</string>
