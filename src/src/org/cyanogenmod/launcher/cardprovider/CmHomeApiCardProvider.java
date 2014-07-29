@@ -88,7 +88,9 @@ public class CmHomeApiCardProvider implements ICardProvider,
             ApiCard apiCard = (ApiCard) card;
             long cardId = apiCard.getDbId();
             DataCard dataCard = mApiManager.getCard(apiCard.getApiAuthority(), cardId);
-            apiCard.updateFromDataCard(dataCard);
+            if (dataCard != null) {
+                apiCard.updateFromDataCard(dataCard);
+            }
         }
     }
 
