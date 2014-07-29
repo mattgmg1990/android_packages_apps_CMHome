@@ -39,6 +39,9 @@ public class CmHomeApiCardProvider implements ICardProvider,
 
     @Override
     public void requestRefresh() {
+        for (DataCard dataCard : mApiManager.getAllDataCards()) {
+            onCardInsertOrUpdate(dataCard.getGlobalId());
+        }
     }
 
     private boolean cardExists(String globalId, List<Card> cards) {
